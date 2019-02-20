@@ -18,14 +18,25 @@ def UserExist(username):
         return True
 
 def verifyPW(username, password):
-    return true
+    if not UserExist(username):
+        return False
+
+    hashed_pw = users.find({
+        "Username":username
+    })[0]["Password"]
+
+    if bcrypt.hashpw(password.encode('utf8'), hashed_pw) == hashed_pw:
+        return True
+    else:
+        return False
+
 
 class Register(Resource):
     def post(self)
         postedData = request.get_json()
 
-        username = postedData["username"]
-        password = postedData['password']
+        username = postedData["Username"]
+        password = postedData['Password']
 
         if (UserExist(username)): 
             retJson = {
@@ -58,11 +69,33 @@ class Detect(Resource):
 
         if not UserExist(username):
             retJson = {
-                "status": "301",
+                "status": 301,
                 "msg": "Invalid Username"
             }
             return jsonify(retJson)
         
+        if not correctPW:
+            retJson = {
+                "status": 302,
+                "msg": "Invalid Password"
+            }
+        
+    #calculate 
+    nlp = spacy.load('en_core_web_sm')
+    
+    text1 = nlp(text1)
+
+    text2 = nlp(text2)
+    # as ratio approaches 1 the more similar the texts are
+    ratio = text1.similarity(text2)
+
+    retJson = {
+        "status": 200,
+        "msg": "Similarity ratio calculated",
+        "ratio": ratio
+    }
+
+    return jsonify(retJson)
 
 @app.route('/')
 def running():
