@@ -12,7 +12,7 @@ db = client.SimilarDB
 users = db["Users"]
 
 def UserExist(username):
-    if user.find({"Username": username }).count() == 0:
+    if users.find({"Username": username }).count() == 0:
         return False
     else:
         return True
@@ -32,7 +32,7 @@ def verifyPW(username, password):
 
 
 class Register(Resource):
-    def post(self)
+    def post(self):
         postedData = request.get_json()
 
         username = postedData["Username"]
@@ -40,7 +40,7 @@ class Register(Resource):
 
         if (UserExist(username)): 
             retJson = {
-                "status": "301",
+                "status": 301,
                 "msg": "Invalid Username"
             }
             return jsonify(retJson)
@@ -56,53 +56,57 @@ class Register(Resource):
             'msg': 'registration successful'
         }
 
+        return jsonify(retJson)
 
 
 class Detect(Resource):
-    def post(self)
+    def post(self):
         postedData = request.get_json()
 
-        username = postedData["username"]
-        password = postedData["password"]
-        text1 = postedData["text1"]
-        text2 = postedData["text2"]
+        username = postedData["Username"]
+        password = postedData["Password"]
+        text1 = postedData["Text1"]
+        text2 = postedData["Text2"]
 
         if not UserExist(username):
             retJson = {
                 "status": 301,
                 "msg": "Invalid Username"
             }
+
             return jsonify(retJson)
         
-        if not correctPW:
+        if not verifyPW(username, password):
             retJson = {
                 "status": 302,
                 "msg": "Invalid Password"
             }
         
-    #calculate 
-    nlp = spacy.load('en_core_web_sm')
-    
-    text1 = nlp(text1)
+        #calculate 
+        nlp = spacy.load('en_core_web_sm')
+        
+        text1 = nlp(text1)
 
-    text2 = nlp(text2)
-    # as ratio approaches 1 the more similar the texts are
-    ratio = text1.similarity(text2)
+        text2 = nlp(text2)
+        # as ratio approaches 1 the more similar the texts are
+        ratio = text1.similarity(text2)
 
-    retJson = {
-        "status": 200,
-        "msg": "Similarity ratio calculated",
-        "ratio": ratio
-    }
+        retJson = {
+            "status": 200,
+            "msg": "Similarity ratio calculated as ratio approaches 1 the more similar the texts are.",
+            "ratio": ratio
+        }
 
-    return jsonify(retJson)
+        return jsonify(retJson)
 
-@app.route('/')
-def running():
-    return "I am fully operational and all my systems are functioning perfectly"
+# @app.route('/')
+# def running():
+#     return "I am fully operational and all my systems are functioning perfectly"
 
 
-api.add_resource(Visit, "/hello")
+# api.add_resource(Visit, "/hello")
+api.add_resource(Detect, "/detect")
+api.add_resource(Register, "/register")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
